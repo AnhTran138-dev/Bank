@@ -40,18 +40,20 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
 export const signIn = async ({ email, password }: signInProps) => {
   try {
     const { account } = await createAdminClient();
-    const session = await account.createEmailPasswordSession(email, password);
 
-    (await cookies()).set("appwrite-session", session.secret, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "strict",
-      secure: true,
-    });
+    const response = await account.createSession(email, password);
+    // const session = await account.createEmailPasswordSession(email, password);
 
-    const user = await getUserInfo({ userId: session.userId });
+    // (await cookies()).set("appwrite-session", session.secret, {
+    //   path: "/",
+    //   httpOnly: true,
+    //   sameSite: "strict",
+    //   secure: true,
+    // });
 
-    return parseStringify(user);
+    // const user = await getUserInfo({ userId: session.userId });
+
+    return parseStringify(response);
   } catch (error) {
     console.error("Error", error);
   }
@@ -74,26 +76,26 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
     if (!newUserAccount) throw new Error("Error creating user");
 
-    const dwollaCustomerUrl = await createDwollaCustomer({
-      ...userData,
-      type: "personal",
-    });
+    // // const dwollaCustomerUrl = await createDwollaCustomer({
+    // //   ...userData,
+    // //   type: "personal",
+    // // });
 
-    if (!dwollaCustomerUrl) throw new Error("Error creating Dwolla customer");
+    // // if (!dwollaCustomerUrl) throw new Error("Error creating Dwolla customer");
 
-    const dwollaCustomerId = extractCustomerIdFromUrl(dwollaCustomerUrl);
+    // // const dwollaCustomerId = extractCustomerIdFromUrl(dwollaCustomerUrl);
 
-    const newUser = await database.createDocument(
-      DATABASE_ID!,
-      USER_COLLECTION_ID!,
-      ID.unique(),
-      {
-        ...userData,
-        userId: newUserAccount.$id,
-        dwollaCustomerId,
-        dwollaCustomerUrl,
-      }
-    );
+    // // const newUser = await database.createDocument(
+    // //   DATABASE_ID!,
+    // //   USER_COLLECTION_ID!,
+    // //   ID.unique(),
+    // //   {
+    // //     ...userData,
+    // //     userId: newUserAccount.$id,
+    // //     dwollaCustomerId,
+    // //     dwollaCustomerUrl,
+    // //   }
+    // // );
 
     const session = await account.createEmailPasswordSession(email, password);
 
@@ -104,7 +106,7 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
       secure: true,
     });
 
-    return parseStringify(newUser);
+    return parseStringify(newUserAccount);
   } catch (error) {
     console.error("Error", error);
   }
@@ -116,7 +118,6 @@ export async function getLoggedInUser() {
     const result = await account.get();
 
     const user = await getUserInfo({ userId: result.$id });
-
     return parseStringify(user);
   } catch (error) {
     console.log(error);
