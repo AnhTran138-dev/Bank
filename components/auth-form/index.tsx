@@ -56,6 +56,7 @@ const AuthForm = ({ type }: { type: string }) => {
         };
 
         const newUser = await signUp(userData);
+        // console.log("new user", newUser);
 
         setUser(newUser);
       }
